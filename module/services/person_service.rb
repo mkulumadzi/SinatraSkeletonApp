@@ -121,10 +121,6 @@ module SkeletonApp
 			end
 		end
 
-		# def self.format_search_term term
-		# 	term.gsub("+", " ")
-		# end
-
 		def self.find_people_from_list_of_emails email_array
 			people = []
 			email_array.each do |email|

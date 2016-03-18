@@ -1,5 +1,3 @@
-ENV['RACK_ENV'] = 'development'
-
 require 'rake/testtask'
 require 'bundler/setup'
 require 'mongoid'
@@ -11,7 +9,7 @@ Rake::TestTask.new do |t|
   t.verbose = true
 end
 
-Mongoid.load!("config/mongoid.yml", ENV['RACK_ENV'])
+Mongoid.load!("config/mongoid.yml", ENV['SKELETON_APP_RACK_ENV'])
 
 task :default => :test
 

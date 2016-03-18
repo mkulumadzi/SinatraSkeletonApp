@@ -1,3 +1,5 @@
+require 'digest/bubblebabble'
+
 module SkeletonApp
 
 	class LoginService
