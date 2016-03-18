@@ -15,3 +15,9 @@
 ### Staging and Production
 
 * Set ENV['MONGOLAB_URI']
+
+## AWS Setup
+
+* Create a bucket for certificates
+* Create a bucket for each environment
+* Create a user, grant read, write and admin privileges to this user

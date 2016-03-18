@@ -10,8 +10,7 @@ lib_path = File.expand_path('../', __FILE__)
 
 Bundler.require(:default)
 
-ENV['RACK_ENV'] = 'development'
-Mongoid.load!("config/mongoid.yml", ENV['RACK_ENV'])
+Mongoid.load!("config/mongoid.yml", ENV['SKELETON_APP_RACK_ENV'])
 Mongoid.logger.level = Logger::INFO
 Mongo::Logger.logger.level = Logger::INFO
 
@@ -43,11 +42,9 @@ end
 
 ## Configuring Dragonfly for accessing images
 Dragonfly.app.configure do
-
 	plugin :imagemagick
-
 	secret 'I miss my Sony camera'
-
+	
   datastore :s3,
 		region: 'us-west-2',
     bucket_name: ENV['SKELETON_APP_AWS_BUCKET'],

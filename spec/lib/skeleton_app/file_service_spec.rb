@@ -104,29 +104,6 @@ describe SkeletonApp::FileService do
 
   end
 
-  describe 'get resources' do
-
-    before do
-      @cards = SkeletonApp::FileService.get_resources "cards"
-    end
-
-    it 'must return an array' do
-      @cards.must_be_instance_of Array
-    end
-
-    it 'must contain uids for all of the cards on the s3 bucket at resources/cards, except the root resource' do
-      s3 = Aws::S3::Resource.new
-      bucket = s3.bucket(ENV['AWS_BUCKET'])
-      expected_number = bucket.objects(prefix: 'resources/cards').collect(&:key).count
-      @cards.count.must_equal expected_number - 1
-    end
-
-    it 'must not contain a reference to the root folder' do
-      @cards.index('resources/cards/').must_equal nil
-    end
-
-  end
-
   describe 'get AWS S3 bucket' do
 
     it 'must return an S3 bucket instance' do
@@ -135,7 +112,7 @@ describe SkeletonApp::FileService do
 
     it 'must point to the bucket specified in the environment variable' do
       bucket = SkeletonApp::FileService.get_bucket
-      bucket.name.must_equal ENV['AWS_BUCKET']
+      bucket.name.must_equal ENV['SKELETON_APP_AWS_BUCKET']
     end
 
   end
@@ -144,7 +121,7 @@ describe SkeletonApp::FileService do
   describe 'get presigned URL from AWS for a key' do
 
     before do
-      @key = 'resources/SlowpostPostman.png'
+      @key = 'test/image1.jpg'
       @url = SkeletonApp::FileService.get_presigned_url @key
     end
 
@@ -165,7 +142,7 @@ describe SkeletonApp::FileService do
   describe 'base 64 encode a file' do
 
     before do
-      @base64String = SkeletonApp::FileService.encode_file 'resources/slowpost_banner.png'
+      @base64String = SkeletonApp::FileService.encode_file 'spec/resources/image1.jpg'
     end
 
     it 'must return a string' do
@@ -173,7 +150,7 @@ describe SkeletonApp::FileService do
     end
 
     it 'must be the base 64-encoded version of the file' do
-      file = File.open('resources/slowpost_banner.png')
+      file = File.open('spec/resources/image1.jpg')
       encoded = Base64.encode64(file.read)
       file.close
       @base64String.must_equal encoded

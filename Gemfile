@@ -16,6 +16,8 @@ gem 'aws-sdk', '~> 2'
 gem 'premailer'
 gem 'dragonfly'
 gem 'dragonfly-s3_data_store'
+gem 'postmark'
+gem 'mime-types'
 
 group :test do
   gem 'turn'

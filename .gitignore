@@ -37,3 +37,5 @@ build/
 
 # Do not check in certificates
 certificates/*
+
+dragonfly.log
