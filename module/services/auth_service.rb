@@ -3,16 +3,16 @@ module SkeletonApp
 	class AuthService
 
 		def self.get_private_key
-			get_certificate_file_from_aws_if_neccessary 'private_key.pem', 'certificates'
-			f = File.open('certificates/private_key.pem', 'r')
+			get_certificate_file_from_aws_if_neccessary 'private.pem', 'certificates'
+			f = File.open('certificates/private.pem', 'r')
 			pem = f.read
 			f.close
 			OpenSSL::PKey::RSA.new pem, ENV['SKELETON_APP_PRIVATE_KEY_PASSPHRASE']
 		end
 
 		def self.get_public_key
-			get_certificate_file_from_aws_if_neccessary 'public_key.pem', 'certificates'
-			f = File.open('certificates/public_key.pem', 'r')
+			get_certificate_file_from_aws_if_neccessary 'public.pem', 'certificates'
+			f = File.open('certificates/public.pem', 'r')
 			pem = f.read
 			f.close
 			OpenSSL::PKey::RSA.new pem
@@ -65,17 +65,15 @@ module SkeletonApp
 		end
 
 		def self.get_password_reset_email_hash person, token
-			banner_image_attachment = SkeletonApp::EmailService.image_email_attachment("resources/slowpost_banner.png")
 			template = 'resources/password_reset_email_template.html'
 			variables = Hash(person: person, token: token)
 
 			Hash[
-				from: ENV["SkeletonApp_POSTMAN_EMAIL_ADDRESS"],
+				from: ENV["SKELETON_APP_POSTMARK_EMAIL_ADDRESS"],
 				to: person.email,
 				subject: "We received a request to reset your password",
 				html_body: SkeletonApp::EmailService.generate_email_message_body(template, variables),
-				track_opens: true,
-				attachments: [banner_image_attachment]
+				track_opens: true
 			]
 		end
 
@@ -100,17 +98,15 @@ module SkeletonApp
 		end
 
 		def self.get_email_validation_hash person, token
-			banner_image_attachment = SkeletonApp::EmailService.image_email_attachment("resources/slowpost_banner.png")
 			template = 'resources/validate_email_template.html'
 			variables = Hash(person: person, token: token)
 
 			Hash[
-				from: ENV["SkeletonApp_POSTMAN_EMAIL_ADDRESS"],
+				from: ENV["SKELETON_APP_POSTMARK_EMAIL_ADDRESS"],
 				to: person.email,
 				subject: "Please validate your email address",
 				html_body: SkeletonApp::EmailService.generate_email_message_body(template, variables),
-				track_opens: true,
-				attachments: [banner_image_attachment]
+				track_opens: true
 			]
 		end
 

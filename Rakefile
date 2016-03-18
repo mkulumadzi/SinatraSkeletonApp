@@ -19,14 +19,17 @@ namespace :db do
 
   task :create_indexes do
   	SkeletonApp::Person.create_indexes
+    SkeletonApp::Token.create_indexes
   end
 
   task :remove_indexes do
     SkeletonApp::Person.remove_indexes
+    SkeletonApp::Token.remove_indexes
   end
 
   task :reset do
     SkeletonApp::Person.delete_all
+    SkeletonApp::Token.delete_all
   end
 
 end
