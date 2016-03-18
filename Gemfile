@@ -11,6 +11,11 @@ gem 'json'
 gem 'rack-test'
 gem 'factory_girl'
 gem 'jwt'
+gem 'apns'
+gem 'aws-sdk', '~> 2'
+gem 'premailer'
+gem 'dragonfly'
+gem 'dragonfly-s3_data_store'
 
 group :test do
   gem 'turn'

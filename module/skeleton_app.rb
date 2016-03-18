@@ -22,3 +22,40 @@ end
 Dir[File.dirname(__FILE__) + '/services/*.rb'].each do |file|
 	require file
 end
+
+## Configuring AWS for storing images
+## To Do: Use Dragonfly for storing as well?
+Aws.config.update({
+  region: 'us-west-2',
+  credentials: Aws::Credentials.new(ENV['SKELETON_APP_AWS_ACCESS_KEY_ID'], ENV['SKELETON_APP_AWS_SECRET_ACCESS_KEY'])
+})
+
+# Method for getting certificate files if necessary
+def get_certificate_file_from_aws_if_neccessary filename, directory
+	if !File.exists?(filename) || File.zero?(filename)
+		s3 = Aws::S3::Resource.new
+		bucket = s3.bucket('skeleton-app-certificates')
+		cert = bucket.object(filename)
+		temp_cert_file = File.new("#{directory}/#{filename}", 'w')
+		cert.get({response_target: temp_cert_file})
+	end
+end
+
+## Configuring Dragonfly for accessing images
+Dragonfly.app.configure do
+
+	plugin :imagemagick
+
+	secret 'I miss my Sony camera'
+
+  datastore :s3,
+		region: 'us-west-2',
+    bucket_name: ENV['SKELETON_APP_AWS_BUCKET'],
+    access_key_id: ENV['SKELETON_APP_AWS_ACCESS_KEY_ID'],
+    secret_access_key: ENV['SKELETON_APP_AWS_SECRET_ACCESS_KEY']
+end
+
+## Increasing max keyspace limit to allow photo uploads in base64 format...
+if Rack::Utils.respond_to?("key_space_limit=")
+  Rack::Utils.key_space_limit = 1048576 # 16 times the default size
+end
