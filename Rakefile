@@ -9,7 +9,7 @@ Rake::TestTask.new do |t|
   t.verbose = true
 end
 
-Mongoid.load!("config/mongoid.yml", ENV['SKELETON_APP_RACK_ENV'])
+Mongoid.load!("config/mongoid.yml", ENV['RACK_ENV'])
 
 task :default => :test
 

@@ -10,7 +10,7 @@ lib_path = File.expand_path('../', __FILE__)
 
 Bundler.require(:default)
 
-Mongoid.load!("config/mongoid.yml", ENV['SKELETON_APP_RACK_ENV'])
+Mongoid.load!("config/mongoid.yml", ENV['RACK_ENV'])
 Mongoid.logger.level = Logger::INFO
 Mongo::Logger.logger.level = Logger::INFO
 
