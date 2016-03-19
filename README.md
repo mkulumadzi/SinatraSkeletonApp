@@ -13,9 +13,10 @@
 * Set ENV['SKELETON_APP_AWS_REGION']
 * Set ENV['SKELETON_APP_POSTMARK_EMAIL_ADDRESS']
 
-### Staging and Production
+### Production and Staging
 
-* Set ENV['MONGOLAB_URI']
+* Need to add a non-public domain email address for Postmark
+
 
 ## AWS Setup
 

@@ -44,7 +44,7 @@ end
 Dragonfly.app.configure do
 	plugin :imagemagick
 	secret 'I miss my Sony camera'
-	
+
   datastore :s3,
 		region: 'us-west-2',
     bucket_name: ENV['SKELETON_APP_AWS_BUCKET'],
