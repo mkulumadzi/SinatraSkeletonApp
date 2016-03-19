@@ -22,7 +22,7 @@ post '/person/new' do
     person = SkeletonApp::PersonService.create_person data
     api_key = SkeletonApp::AppService.email_api_key request
     SkeletonApp::AuthService.send_email_validation_email_if_necessary person, api_key
-    person_link = "#{ENV['SkeletonApp_BASE_URL']}/person/id/#{person.id}"
+    person_link = "#{ENV['SKELETON_APP_BASE_URL']}/person/id/#{person.id}"
     headers = { "location" => person_link }
     [201, headers, nil]
   rescue Mongo::Error::OperationFailure => error
@@ -58,24 +58,6 @@ post '/login' do
   data = JSON.parse request.body.read
   begin
     person = SkeletonApp::LoginService.check_login data
-    if person
-      response_body = SkeletonApp::LoginService.response_for_successful_login person
-      [200, response_body]
-    else
-      [401, nil]
-    end
-  rescue Mongoid::Errors::DocumentNotFound
-    [401, nil]
-  end
-end
-
-# Login with email and facebook id
-# Scope: nil
-post '/login/facebook' do
-  content_type :json
-  data = JSON.parse request.body.read
-  begin
-    person = SkeletonApp::LoginService.check_facebook_login data
     if person
       response_body = SkeletonApp::LoginService.response_for_successful_login person
       [200, response_body]

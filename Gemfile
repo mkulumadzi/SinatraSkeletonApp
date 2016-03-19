@@ -11,7 +11,6 @@ gem 'json'
 gem 'rack-test'
 gem 'factory_girl'
 gem 'jwt'
-gem 'apns'
 gem 'aws-sdk', '~> 2'
 gem 'premailer'
 gem 'dragonfly'
@@ -25,4 +24,5 @@ group :test do
   gem 'minitest-reporters'
   gem 'mocha'
   gem 'm'
+  gem 'faker'
 end

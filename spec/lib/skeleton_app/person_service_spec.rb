@@ -363,7 +363,7 @@ describe SkeletonApp::PersonService do
 
 					it 'must return partial matches of a single term with username' do
 						person = create(:person, username: SecureRandom.hex)
-						term = person.username[0..2]
+						term = person.username[0..(person.username.length - 2)]
 						params = Hash("term" => "#{term}")
 						people = SkeletonApp::PersonService.search_people params
 						people.must_include person

@@ -12,7 +12,6 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.4.0)
     ansi (1.5.0)
-    apns (1.0.0)
     aws-sdk (2.2.26)
       aws-sdk-resources (= 2.2.26)
     aws-sdk-core (2.2.26)
@@ -35,6 +34,8 @@ GEM
     excon (0.48.0)
     factory_girl (4.5.0)
       activesupport (>= 3.0.0)
+    faker (1.6.3)
+      i18n (~> 0.5)
     fog-aws (0.9.1)
       fog-core (~> 1.27)
       fog-json (~> 1.0)
@@ -118,12 +119,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  apns
   aws-sdk (~> 2)
   bson_ext
   dragonfly
   dragonfly-s3_data_store
   factory_girl
+  faker
   json
   jwt
   m

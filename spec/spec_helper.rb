@@ -13,6 +13,7 @@ require 'bundler/setup'
 require 'rubygems'
 require 'mongoid'
 require 'mocha/setup'
+require 'faker'
 
 Bundler.require(:default)
 
@@ -28,3 +29,5 @@ end
 class MiniTest::Spec
   include FactoryGirl::Syntax::Methods
 end
+
+Faker::Config.locale = 'en-US'
