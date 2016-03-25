@@ -276,6 +276,7 @@ describe SkeletonApp::AppService do
 
       before do
         ENV['SKELETON_APP_EMAIL_ENABLED'] = 'yes'
+        ENV['SKELETON_APP_POSTMARK_EMAIL_ADDRESS'] = "test@test.com"
         @result = SkeletonApp::AppService.send_authorization_email_if_enabled(@person, last_request)
       end
 
@@ -312,6 +313,7 @@ describe SkeletonApp::AppService do
 
       before do
         ENV['SKELETON_APP_EMAIL_ENABLED'] = 'yes'
+        ENV['SKELETON_APP_POSTMARK_EMAIL_ADDRESS'] = "test@test.com"
       end
 
       describe 'email address has changed' do
@@ -360,6 +362,7 @@ describe SkeletonApp::AppService do
 
       before do
         ENV['SKELETON_APP_EMAIL_ENABLED'] = 'yes'
+        ENV['SKELETON_APP_POSTMARK_EMAIL_ADDRESS'] = "test@test.com"
         @result = SkeletonApp::AppService.send_password_reset_email_if_enabled(@person, last_request)
       end
 
@@ -380,48 +383,6 @@ describe SkeletonApp::AppService do
         SkeletonApp::AppService.send_password_reset_email_if_enabled(@person, last_request).must_equal Hash.new
       end
 
-    end
-
-  end
-
-  describe 'json document for person' do
-
-    before do
-      @person = build(:person, username: SecureRandom.hex)
-      @person.hashed_password = "abc"
-      @person.salt = "def"
-      @person.facebook_id = "123"
-      @person.device_token = "456"
-      @json_document = SkeletonApp::AppService.json_document_for_person @person
-      @parsed_document = JSON.parse(@json_document)
-    end
-
-    it 'must return a parseable json document' do
-      @parsed_document.must_be_instance_of Hash
-    end
-
-    it 'must include the person info' do
-      @parsed_document["username"].must_equal @person.username
-    end
-
-    it 'must not include the salt' do
-      @parsed_document["salt"].must_equal nil
-    end
-
-    it 'must not include the hashed_password' do
-      @parsed_document["hashed_passwords"].must_equal nil
-    end
-
-    it 'must not include the device_token' do
-      @parsed_document["device_token"].must_equal nil
-    end
-
-    it 'must not include the facebook_id' do
-      @parsed_document["facebook_id"].must_equal nil
-    end
-
-    it 'must not include the facebook token' do
-      @parsed_document["facebook_token"].must_equal nil
     end
 
   end

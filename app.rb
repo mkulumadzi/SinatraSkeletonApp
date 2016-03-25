@@ -21,8 +21,7 @@ post '/person/new' do
   begin
     person = SkeletonApp::PersonService.create_person data
     SkeletonApp::AppService.send_authorization_email_if_enabled person, request
-    person_link = "#{ENV['SKELETON_APP_BASE_URL']}/person/id/#{person.id}"
-    headers = { "location" => person_link }
+    headers = { "location" => person.uri }
     [201, headers, nil]
   rescue Mongo::Error::OperationFailure => error
     response_body = Hash["message", "An account with that username already exists!"].to_json
@@ -38,9 +37,7 @@ end
 # Scope: create-person
 get '/available' do
   content_type :json
-
   if SkeletonApp::AppService.unauthorized?(request, "create-person") then return [401, nil] end
-
   begin
     response_body = SkeletonApp::PersonService.check_field_availability(params).to_json
     [200, response_body]
@@ -75,14 +72,12 @@ get '/person/id/:id' do
 
   begin
     person = SkeletonApp::Person.find(params[:id])
-    person_response = SkeletonApp::AppService.json_document_for_person person
-
     if request.env["HTTP_IF_MODIFIED_SINCE"] == nil
-      [200, person_response]
+      [200, person.as_json]
     else
       modified_since = Time.parse(env["HTTP_IF_MODIFIED_SINCE"])
       if person.updated_at.to_i > modified_since.to_i
-        [200, person_response]
+        [200, person.as_json]
       else
         [304, nil]
       end

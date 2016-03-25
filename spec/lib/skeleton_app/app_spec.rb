@@ -139,7 +139,7 @@ describe app do
   			last_response.body.must_equal ""
   		end
 
-  		it 'must include a link to the person in the header' do
+  		it 'must include the person uri in the header' do
   			assert_match(/#{ENV['SKELETON_APP_BASE_URL']}\/person\/id\/\w{24}/, last_response.header["location"])
   		end
 
@@ -672,40 +672,63 @@ describe app do
 
   describe 'request password reset token' do
 
-    describe 'successful request' do
+		describe 'email enabled' do
 
-      before do
-        data = '{"email": "' + @person1.email + '"}'
-        post "/request_password_reset?test=true", data, {"HTTP_AUTHORIZATION" => "Bearer #{@app_token}"}
-      end
+			before do
+				ENV['SKELETON_APP_EMAIL_ENABLED'] = 'yes'
+        ENV['SKELETON_APP_POSTMARK_EMAIL_ADDRESS'] = "test@test.com"
+			end
 
-      it 'must return a 201 status' do
-        last_response.status.must_equal 201
-      end
+			describe 'successful request' do
 
-      it 'must return an empty response' do
-        last_response.body.must_equal ""
-      end
+	      before do
+	        data = '{"email": "' + @person1.email + '"}'
+	        post "/request_password_reset?test=true", data, {"HTTP_AUTHORIZATION" => "Bearer #{@app_token}"}
+	      end
 
-    end
+	      it 'must return a 201 status' do
+	        last_response.status.must_equal 201
+	      end
 
-    describe 'email does not match an account' do
+	      it 'must return an empty response' do
+	        last_response.body.must_equal ""
+	      end
 
-      before do
-        data = '{"email": "notanemail@notaprovider.com"}'
-        post "/request_password_reset", data, {"HTTP_AUTHORIZATION" => "Bearer #{@app_token}"}
-      end
+	    end
 
-      it 'must return a 404 status' do
-        last_response.status.must_equal 404
-      end
+	    describe 'email does not match an account' do
 
-      it 'must return an error message' do
-        response = JSON.parse(last_response.body)
-        response["message"].must_equal "An account with that email does not exist."
-      end
+	      before do
+	        data = '{"email": "notanemail@notaprovider.com"}'
+	        post "/request_password_reset", data, {"HTTP_AUTHORIZATION" => "Bearer #{@app_token}"}
+	      end
 
-    end
+	      it 'must return a 404 status' do
+	        last_response.status.must_equal 404
+	      end
+
+	      it 'must return an error message' do
+	        response = JSON.parse(last_response.body)
+	        response["message"].must_equal "An account with that email does not exist."
+	      end
+
+	    end
+
+			describe 'email disabled' do
+
+				before do
+					ENV['SKELETON_APP_EMAIL_ENABLED'] = 'no'
+					data = '{"email": "' + @person1.email + '"}'
+					post "/request_password_reset?test=true", data, {"HTTP_AUTHORIZATION" => "Bearer #{@app_token}"}
+				end
+
+				it 'must return a 403 status' do
+					last_response.status.must_equal 403
+				end
+
+			end
+
+		end
 
   end
 

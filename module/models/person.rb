@@ -51,5 +51,13 @@ module SkeletonApp
 			self.save
 		end
 
+		def uri
+			"#{ENV['SKELETON_APP_BASE_URL']}/person/id/#{self.id}"
+		end
+
+		def as_json
+			self.as_document.to_json( :except => ["salt", "hashed_password", "device_token", "facebook_id", "facebook_token"] )
+		end
+
 	end
 end
