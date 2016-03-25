@@ -40,7 +40,6 @@ end
 get '/available' do
   content_type :json
 
-
   if SkeletonApp::AppService.unauthorized?(request, "create-person") then return [401, nil] end
 
   begin

@@ -240,7 +240,7 @@ describe SkeletonApp::AuthService do
 			it 'must include details from the password reset payload, including the expiration date' do
 				decoded_token = SkeletonApp::AuthService.decode_token @token
 				payload =  SkeletonApp::AuthService.generate_payload_for_password_reset @person
-				decoded_token[0]["exp"].must_equal payload[:exp]
+				decoded_token[0]["exp"].to_i.must_equal payload[:exp].to_i
 			end
 
 		end

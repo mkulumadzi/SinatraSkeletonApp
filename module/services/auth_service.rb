@@ -3,19 +3,15 @@ module SkeletonApp
 	class AuthService
 
 		def self.get_private_key
-			get_certificate_file_from_aws_if_neccessary 'private.pem', 'certificates'
-			f = File.open('certificates/private.pem', 'r')
-			pem = f.read
-			f.close
-			OpenSSL::PKey::RSA.new pem, ENV['SKELETON_APP_PRIVATE_KEY_PASSPHRASE']
+			client = Aws::S3::Client.new
+			private_key_file = client.get_object(bucket:ENV['SKELETON_APP_CERTIFIATE_BUCKET'], key:'private.pem')
+			OpenSSL::PKey::RSA.new private_key_file.body.read, ENV['SKELETON_APP_PRIVATE_KEY_PASSPHRASE']
 		end
 
 		def self.get_public_key
-			get_certificate_file_from_aws_if_neccessary 'public.pem', 'certificates'
-			f = File.open('certificates/public.pem', 'r')
-			pem = f.read
-			f.close
-			OpenSSL::PKey::RSA.new pem
+			client = Aws::S3::Client.new
+			public_key_file = client.get_object(bucket:ENV['SKELETON_APP_CERTIFIATE_BUCKET'], key:'public.pem')
+			OpenSSL::PKey::RSA.new public_key_file.body.read
 		end
 
 		def self.generate_expiration_date_for_token

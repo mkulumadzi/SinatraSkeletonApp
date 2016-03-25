@@ -29,17 +29,6 @@ Aws.config.update({
   credentials: Aws::Credentials.new(ENV['SKELETON_APP_AWS_ACCESS_KEY_ID'], ENV['SKELETON_APP_AWS_SECRET_ACCESS_KEY'])
 })
 
-# Method for getting certificate files if necessary
-def get_certificate_file_from_aws_if_neccessary filename, directory
-	if !File.exists?(filename) || File.zero?(filename)
-		s3 = Aws::S3::Resource.new
-		bucket = s3.bucket('skeleton-app-certificates')
-		cert = bucket.object(filename)
-		temp_cert_file = File.new("#{directory}/#{filename}", 'w')
-		cert.get({response_target: temp_cert_file})
-	end
-end
-
 ## Configuring Dragonfly for accessing images
 Dragonfly.app.configure do
 	plugin :imagemagick
