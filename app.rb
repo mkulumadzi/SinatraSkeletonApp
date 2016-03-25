@@ -14,15 +14,17 @@ end
 # Scope: create-person
 post '/person/new' do
   content_type :json
-  data = JSON.parse request.body.read
-
   if SkeletonApp::AppService.unauthorized?(request, "create-person") then return [401, nil] end
 
   begin
+    data = JSON.parse request.body.read
     person = SkeletonApp::PersonService.create_person data
     SkeletonApp::AppService.send_authorization_email_if_enabled person, request
     headers = { "location" => person.uri }
     [201, headers, nil]
+  rescue JSON::ParserError
+    response_body = Hash["message", "Malformed JSON"].to_json
+    [400, nil, response_body]
   rescue Mongo::Error::OperationFailure => error
     response_body = Hash["message", "An account with that username already exists!"].to_json
     [403, nil, response_body]
@@ -50,8 +52,8 @@ end
 # Scope: nil
 post '/login' do
   content_type :json
-  data = JSON.parse request.body.read
   begin
+    data = JSON.parse request.body.read
     person = SkeletonApp::LoginService.check_login data
     if person
       response_body = SkeletonApp::LoginService.response_for_successful_login person
@@ -59,6 +61,9 @@ post '/login' do
     else
       [401, nil]
     end
+  rescue JSON::ParserError
+    response_body = Hash["message", "Malformed JSON"].to_json
+    [400, nil, response_body]
   rescue Mongoid::Errors::DocumentNotFound
     [401, nil]
   end
@@ -92,13 +97,16 @@ end
 # Scope: admin or (can_write & is person)
 post '/person/id/:id' do
   content_type :json
-  data = JSON.parse request.body.read
   if SkeletonApp::AppService.not_admin_or_owner?(request, "can-write", params[:id]) then return [401, nil] end
   begin
+    data = JSON.parse request.body.read
     person = SkeletonApp::Person.find(params[:id])
     SkeletonApp::PersonService.update_person person, data
     SkeletonApp::AppService.send_validation_email_for_email_change_if_enabled person, request, data["email"]
     [204, nil]
+  rescue JSON::ParserError
+    response_body = Hash["message", "Malformed JSON"].to_json
+    [400, nil, response_body]
   rescue Mongoid::Errors::DocumentNotFound
     [404, nil]
   rescue Mongo::Error::OperationFailure
@@ -116,11 +124,14 @@ end
 # Scope: reset-password
 post '/person/id/:id/reset_password' do
   content_type :json
-  data = JSON.parse(request.body.read)
   if SkeletonApp::AppService.unauthorized?(request, "reset-password") then return [401, nil] end
   begin
+    data = JSON.parse(request.body.read)
     SkeletonApp::LoginService.password_reset_by_user params[:id], data
     [204, nil]
+  rescue JSON::ParserError
+    response_body = Hash["message", "Malformed JSON"].to_json
+    [400, nil, response_body]
   rescue Mongoid::Errors::DocumentNotFound
     [404, nil]
   rescue RuntimeError => error
@@ -181,12 +192,11 @@ end
 #Request token for resetting user password
 post '/request_password_reset' do
   content_type :json
-  data = JSON.parse(request.body.read)
-
   # Check the token
   if SkeletonApp::AppService.unauthorized?(request, "reset-password") then return [401, nil] end
 
   begin
+    data = JSON.parse(request.body.read)
     person = SkeletonApp::Person.find_by(email: data["email"])
     email_sent = SkeletonApp::AppService.send_password_reset_email_if_enabled person, request
     if email_sent[:error_code] == 0
@@ -194,6 +204,9 @@ post '/request_password_reset' do
     else
       [403, nil]
     end
+  rescue JSON::ParserError
+    response_body = Hash["message", "Malformed JSON"].to_json
+    [400, nil, response_body]
   rescue Mongoid::Errors::DocumentNotFound
     response_body = Hash["message", "An account with that email does not exist."].to_json
     [404, response_body]
@@ -239,13 +252,16 @@ end
 
 post '/people/find_matches' do
   content_type :json
-  data = JSON.parse request.body.read
   if SkeletonApp::AppService.unauthorized?(request, "can-read") then return [401, nil] end
   begin
+    data = JSON.parse request.body.read
     people = SkeletonApp::PersonService.find_people_from_list_of_emails data["emails"]
     documents = SkeletonApp::AppService.convert_objects_to_documents people
     response_body = SkeletonApp::AppService.json_document_for_people_documents documents
     [201, response_body]
+  rescue JSON::ParserError
+    response_body = Hash["message", "Malformed JSON"].to_json
+    [400, nil, response_body]
   rescue Mongoid::Errors::DocumentNotFound
     [404, nil]
   end
@@ -254,13 +270,16 @@ end
 # Upload a File
 # Scope: can-write
 post '/upload' do
-  data = JSON.parse request.body.read.gsub("\n", "")
   if SkeletonApp::AppService.unauthorized?(request, "can-write") then return [401, nil] end
 
   begin
+    data = JSON.parse request.body.read.gsub("\n", "")
     uid = SkeletonApp::FileService.upload_file data
     headers = { "location" => uid }
     [201, headers, nil]
+  rescue JSON::ParserError
+    response_body = Hash["message", "Malformed JSON"].to_json
+    [400, nil, response_body]
   rescue ArgumentError => error
     response_body = Hash["message", error.to_s].to_json
     [403, nil, response_body]

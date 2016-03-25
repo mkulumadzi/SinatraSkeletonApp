@@ -263,6 +263,25 @@ describe app do
       end
     end
 
+		describe 'malformed JSON' do
+
+			before do
+				username = SecureRandom.hex
+        data = '{"username": "' + username + '" "phone": "' + Faker::PhoneNumber.phone_number + '}'
+				post "/person/new", data, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_token}"}
+			end
+
+			it 'must return a 400 status' do
+				last_response.status.must_equal 400
+			end
+
+			it 'must return the correct error message' do
+				response = JSON.parse(last_response.body)
+				response["message"].must_equal "Malformed JSON"
+			end
+
+		end
+
 	end
 
 	describe '/person/id/:id' do
