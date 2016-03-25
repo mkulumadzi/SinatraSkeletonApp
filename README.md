@@ -69,7 +69,7 @@ POST /person/new
 Status: 201
 
 Headers:
-location = /person/id/{person_id}
+location = app_root/person/id/{person_id}
 ```
 
 Log in:
@@ -83,6 +83,31 @@ POST /login
 }
 
 Status: 200
+
+Response body:
+
+{
+  "access_token": User OAuth token
+  "token_type": "bearer"
+  "expires_in": "6220800"
+  "person": {
+    "_id": {
+      "$oid": Person Id
+    }-
+    "username": "username"
+    "given_name": "Test"
+    "family_name": "Person"
+    "email": "person@test.com"
+    "email_address_validated": false
+    "phone": "5554441234"
+    "address1": "Street Address"
+    "city": "City"
+    "state": "ST"
+    "zip": "11111"
+    "updated_at": "2016-03-25T20:28:09.539Z"
+    "created_at": "2016-03-25T20:28:09.539Z"
+  }
+}
 ```
 
 Get a person record:
@@ -95,17 +120,21 @@ Status: 200
 Response body:
 
 {
-	_id: {
-		$oid: "uuid"
+	"_id": {
+		"$oid": Person Id
 	},
-	name: "Person Name",
-	username: "username",
-	address1: "Street Address",
-	city: "City",
-	state: "ST",
-	zip: "11111",
-	updated_at: "2015-06-17T20:36:39.024Z"
-	created_at: "2015-06-17T20:36:39.009Z"
+  "username": "username"
+  "given_name": "Test"
+  "family_name": "Person"
+  "email": "person@test.com"
+  "email_address_validated": false
+  "phone": "5554441234"
+  "address1": "Street Address"
+  "city": "City"
+  "state": "ST"
+  "zip": "11111"
+  "updated_at": "2016-03-25T20:28:09.539Z"
+  "created_at": "2016-03-25T20:28:09.539Z"
 }
 ```
 
@@ -148,18 +177,22 @@ Response body:
 
 [
 	{
-		_id: {
-			$oid: "uuid"
-		},
-		name: "Person Name",
-		username: "username",
-		address1: "Street Address",
-		city: "City",
-		state: "ST",
-		zip: "11111",
-		updated_at: "2015-06-17T20:36:39.024Z"
-		created_at: "2015-06-17T20:36:39.009Z"
-	}
+  	"_id": {
+  		"$oid": Person Id
+  	},
+    "username": "username"
+    "given_name": "Test"
+    "family_name": "Person"
+    "email": "person@test.com"
+    "email_address_validated": false
+    "phone": "5554441234"
+    "address1": "Street Address"
+    "city": "City"
+    "state": "ST"
+    "zip": "11111"
+    "updated_at": "2016-03-25T20:28:09.539Z"
+    "created_at": "2016-03-25T20:28:09.539Z"
+  }
 ]
 ```
 
@@ -176,85 +209,77 @@ Status: 200
 Response body:
 [
 	{
-		_id: {
-			$oid: "uuid"
-		},
-		name: "Evan 1",
-		username: "username1",
-		address1: "Street Address",
-		city: "City",
-		state: "ST",
-		zip: "11111",
-		updated_at: "2015-06-17T20:36:39.024Z"
-		created_at: "2015-06-17T20:36:39.009Z"
-	},
-	{
-		_id: {
-			$oid: "uuid"
-		},
-		name: "Evan 2",
-		username: "username2",
-		address1: "Street Address",
-		city: "City",
-		state: "ST",
-		zip: "11111",
-		updated_at: "2015-06-17T20:36:39.024Z"
-		created_at: "2015-06-17T20:36:39.009Z"
-	}
+  	"_id": {
+  		"$oid": Person Id
+  	},
+    "username": "username"
+    "given_name": "Test"
+    "family_name": "Person"
+    "email": "person@test.com"
+    "email_address_validated": false
+    "phone": "5554441234"
+    "address1": "Street Address"
+    "city": "City"
+    "state": "ST"
+    "zip": "11111"
+    "updated_at": "2016-03-25T20:28:09.539Z"
+    "created_at": "2016-03-25T20:28:09.539Z"
+  }
 ]
+```
+
+Find matches for people using a list of email addresses:
 
 ```
 
-Perform a bulk search of people using emails and phone numbers:
-* The iOS app searches a person's contacts and passes in an array of these contacts, including email and phone numbers for each contact
-* The postoffice server returns a unique list of any people who match the contact records
+POST /people/find_matches
 
-```
+{
+    "emails": ["person1@test.com", "person2@test.com"]
+}
 
-POST /people/bulk_search
+Status: 201
 
+Response body:
 [
 	{
-		"emails": ["person1@test.com", "person1@gmail.com"],
-		"phoneNumbers": ["5554441243"]
-	},
-	{
-		"emails": ["person2@test.com"],
-		"phoneNumbers": ["5553332222"]
-	}
+  	"_id": {
+  		"$oid": Person Id
+  	},
+    "username": "username"
+    "given_name": "Test"
+    "family_name": "Person"
+    "email": "person1@test.com"
+    "email_address_validated": false
+    "phone": "5554441234"
+    "address1": "Street Address"
+    "city": "City"
+    "state": "ST"
+    "zip": "11111"
+    "updated_at": "2016-03-25T20:28:09.539Z"
+    "created_at": "2016-03-25T20:28:09.539Z"
+  }
 ]
+```
+
+### Files
+
+Upload a file to the S3 file store:
+
+```
+POST /upload
+
+Contents: Base 64 encoded file
+
+Status: 201
+```
+
+Get am image from the S3 file store:
+
+```
+GET /image/{image_uuid}
 
 Status: 200
 
-Reponse body:
-[
-	{
-		_id: {
-			$oid: "uuid"
-		},
-		name: "Evan 1",
-		username: "username1",
-		email: "person1@test.com",
-		address1: "Street Address",
-		city: "City",
-		state: "ST",
-		zip: "11111",
-		updated_at: "2015-06-17T20:36:39.024Z"
-		created_at: "2015-06-17T20:36:39.009Z"
-	},
-	{
-		_id: {
-			$oid: "uuid"
-		},
-		name: "Evan 2",
-		username: "username2",
-		emails: "person2@test.com",
-		address1: "Street Address",
-		city: "City",
-		state: "ST",
-		zip: "11111",
-		updated_at: "2015-06-17T20:36:39.024Z"
-		created_at: "2015-06-17T20:36:39.009Z"
-	}
-]
+Redirects to a presigned URL for the S3 data store
 ```
