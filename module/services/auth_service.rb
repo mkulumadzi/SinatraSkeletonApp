@@ -4,13 +4,13 @@ module SkeletonApp
 
 		def self.get_private_key
 			client = Aws::S3::Client.new
-			private_key_file = client.get_object(bucket:ENV['SKELETON_APP_CERTIFIATE_BUCKET'], key:'private.pem')
+			private_key_file = client.get_object(bucket:ENV['SKELETON_APP_CERTIFICATE_BUCKET'], key:'private.pem')
 			OpenSSL::PKey::RSA.new private_key_file.body.read, ENV['SKELETON_APP_PRIVATE_KEY_PASSPHRASE']
 		end
 
 		def self.get_public_key
 			client = Aws::S3::Client.new
-			public_key_file = client.get_object(bucket:ENV['SKELETON_APP_CERTIFIATE_BUCKET'], key:'public.pem')
+			public_key_file = client.get_object(bucket:ENV['SKELETON_APP_CERTIFICATE_BUCKET'], key:'public.pem')
 			OpenSSL::PKey::RSA.new public_key_file.body.read
 		end
 

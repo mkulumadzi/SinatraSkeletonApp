@@ -211,6 +211,7 @@ describe SkeletonApp::AuthService do
 
 			before do
 				@token = SkeletonApp::AuthService.get_password_reset_token @person
+				@payload =  SkeletonApp::AuthService.generate_payload_for_password_reset @person
 			end
 
 			describe 'generate payload or password reset' do
@@ -239,8 +240,9 @@ describe SkeletonApp::AuthService do
 
 			it 'must include details from the password reset payload, including the expiration date' do
 				decoded_token = SkeletonApp::AuthService.decode_token @token
-				payload =  SkeletonApp::AuthService.generate_payload_for_password_reset @person
-				decoded_token[0]["exp"].to_i.must_equal payload[:exp].to_i
+				#Testing for a date that's close, since the timestamps may be a bit off
+				assert_operator decoded_token[0]["exp"], :>=, @payload[:exp] - 10
+				assert_operator decoded_token[0]["exp"], :<=, @payload[:exp] +10
 			end
 
 		end
@@ -297,6 +299,7 @@ describe SkeletonApp::AuthService do
 
 			before do
 				@token = SkeletonApp::AuthService.get_email_validation_token @person
+				@payload =  SkeletonApp::AuthService.generate_payload_for_email_validation @person
 			end
 
 			describe 'generate payload for email validation' do
@@ -325,8 +328,9 @@ describe SkeletonApp::AuthService do
 
 			it 'must include details from the email validation payload, including the expiration date' do
 				decoded_token = SkeletonApp::AuthService.decode_token @token
-				payload =  SkeletonApp::AuthService.generate_payload_for_email_validation @person
-				decoded_token[0]["exp"].must_equal payload[:exp]
+				#Testing for a date that's close, since the timestamps may be a bit off
+				assert_operator decoded_token[0]["exp"], :>=, @payload[:exp] - 10
+				assert_operator decoded_token[0]["exp"], :<=, @payload[:exp] +10
 			end
 
 		end
