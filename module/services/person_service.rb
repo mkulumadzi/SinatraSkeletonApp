@@ -62,30 +62,14 @@ module SkeletonApp
 			phone.tr('^0-9', '')
 		end
 
-		def self.update_person person_id, data, api_key = "POSTMARK_API_TEST"
-			person = SkeletonApp::Person.find(person_id)
+		def self.update_person person, data
+			data["username"] ? raise(ArgumentError) : nil
 
-			if data["username"]
-				raise ArgumentError
-			end
-
-			old_email = person.email
 			if data["email"] && data["email"] != person.email && SkeletonApp::Person.where(email: data["email"]).exists?
 				raise "An account with that email already exists!"
 			end
 
 			person.update_attributes!(data)
-
-			self.send_email_to_validate_email_address_change person, data, old_email, api_key
-
-		end
-
-		def self.send_email_to_validate_email_address_change person, data, old_email, api_key = "POSTMARK_API_TEST"
-	    if data["email"] != nil && data["email"] != old_email
-				person.email_address_validated = false
-				person.save
-	      SkeletonApp::AuthService.send_email_validation_email_if_necessary person, api_key
-	    end
 		end
 
 		def self.get_people params = {}

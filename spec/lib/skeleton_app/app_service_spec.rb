@@ -237,6 +237,20 @@ describe SkeletonApp::AppService do
 
   end
 
+  describe 'email enabled?' do
+
+    it 'must return true if sending email is enabled' do
+      ENV['SKELETON_APP_EMAIL_ENABLED'] = 'yes'
+      SkeletonApp::AppService.email_enabled?.must_equal true
+    end
+
+    it 'must return false if sending email is not enabled' do
+      ENV['SKELETON_APP_EMAIL_ENABLED'] = 'no'
+      SkeletonApp::AppService.email_enabled?.must_equal false
+    end
+
+  end
+
   describe 'email api key' do
 
     it 'must return the test key for test requests' do
@@ -247,6 +261,125 @@ describe SkeletonApp::AppService do
     it 'must return the api key for real requests' do
       get '/'
       SkeletonApp::AppService.email_api_key(last_request).must_equal ENV["POSTMARK_API_KEY"]
+    end
+
+  end
+
+  describe 'send authorization email if enabled' do
+
+    before do
+      @person = build(:person, username: SecureRandom.hex)
+      get '/?test=true' # Create a dummy get request to generate the test api key
+    end
+
+    describe 'email is enabled' do
+
+      before do
+        ENV['SKELETON_APP_EMAIL_ENABLED'] = 'yes'
+        @result = SkeletonApp::AppService.send_authorization_email_if_enabled(@person, last_request)
+      end
+
+      it 'must return a Hash with "to" addressed to the test user email' do
+        @result[:to].must_equal @person.email
+      end
+
+      it 'must have 0 for the error code' do
+        @result[:error_code].must_equal 0
+      end
+
+    end
+
+    describe 'email is not enabled' do
+
+      it 'must return nil' do
+        ENV['SKELETON_APP_EMAIL_ENABLED'] = 'no'
+        SkeletonApp::AppService.send_authorization_email_if_enabled(@person, last_request).must_equal nil
+      end
+
+    end
+
+  end
+
+  describe 'send validation email for email change if enabled' do
+
+    before do
+      @person = build(:person, username: SecureRandom.hex)
+      @person.mark_email_as_valid
+      get '/?test=true' # Create a dummy get request to generate the test api key
+    end
+
+    describe 'email is enabled' do
+
+      before do
+        ENV['SKELETON_APP_EMAIL_ENABLED'] = 'yes'
+      end
+
+      describe 'email address has changed' do
+
+        before do
+          old_email = "old_email@test.com"
+          @result = SkeletonApp::AppService.send_validation_email_for_email_change_if_enabled @person, last_request, old_email
+        end
+
+        it 'must return a Hash with "to" addressed to the test user email' do
+          @result[:to].must_equal @person.email
+        end
+
+        it 'must have 0 for the error code' do
+          @result[:error_code].must_equal 0
+        end
+
+        it 'must have marked the person as having an unvalidated email address' do
+          db_person = SkeletonApp::Person.find(@person.id)
+          db_person.email_address_validated.must_equal false
+        end
+
+      end
+
+    end
+
+    describe 'email is not enabled' do
+
+      it 'must return nil' do
+        ENV['SKELETON_APP_EMAIL_ENABLED'] = 'no'
+        SkeletonApp::AppService.send_validation_email_for_email_change_if_enabled @person, last_request, "not_email@test.com"
+      end
+
+    end
+
+  end
+
+  describe 'send password reset email if enabled' do
+
+    before do
+      @person = build(:person, username: SecureRandom.hex)
+      get '/?test=true' # Create a dummy get request to generate the test api key
+    end
+
+    describe 'email is enabled' do
+
+      before do
+        ENV['SKELETON_APP_EMAIL_ENABLED'] = 'yes'
+        @result = SkeletonApp::AppService.send_password_reset_email_if_enabled(@person, last_request)
+      end
+
+      it 'must return a Hash with "to" addressed to the test user email' do
+        @result[:to].must_equal @person.email
+      end
+
+      it 'must have 0 for the error code' do
+        @result[:error_code].must_equal 0
+      end
+
+    end
+
+    describe 'email is not enabled' do
+
+      it 'must return and empty hash' do
+        ENV['SKELETON_APP_EMAIL_ENABLED'] = 'no'
+        SkeletonApp::AppService.send_password_reset_email_if_enabled(@person, last_request).must_equal Hash.new
+      end
+
     end
 
   end

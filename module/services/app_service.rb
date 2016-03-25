@@ -102,11 +102,42 @@ module SkeletonApp
       document_array
     end
 
+    # Configuring a global variable that checks whether sending email is enabled in the app
+    def self.email_enabled?
+      ENV['SKELETON_APP_EMAIL_ENABLED'] == 'yes' ? true : false
+    end
+
     def self.email_api_key request
       if request.params["test"] == "true"
         "POSTMARK_API_TEST"
       else
         ENV["POSTMARK_API_KEY"]
+      end
+    end
+
+    def self.send_authorization_email_if_enabled person, request
+      if self.email_enabled?
+        api_key = SkeletonApp::AppService.email_api_key request
+        SkeletonApp::AuthService.send_email_validation_email_if_necessary person, api_key
+      end
+    end
+
+    def self.send_validation_email_for_email_change_if_enabled person, request, old_email
+      if self.email_enabled? && old_email && person.email != old_email
+        person.email_address_validated = false
+        person.save
+        api_key = SkeletonApp::AppService.email_api_key request
+        SkeletonApp::AuthService.send_email_validation_email_if_necessary person, api_key
+      end
+    end
+
+    def self.send_password_reset_email_if_enabled person, request
+      if self.email_enabled?
+        api_key = SkeletonApp::AppService.email_api_key request
+        SkeletonApp::AuthService.send_password_reset_email person, api_key
+      else
+        # App expects a hash, so return an empty hash
+        Hash.new
       end
     end
 

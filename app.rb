@@ -20,8 +20,7 @@ post '/person/new' do
 
   begin
     person = SkeletonApp::PersonService.create_person data
-    api_key = SkeletonApp::AppService.email_api_key request
-    SkeletonApp::AuthService.send_email_validation_email_if_necessary person, api_key
+    SkeletonApp::AppService.send_authorization_email_if_enabled person, request
     person_link = "#{ENV['SKELETON_APP_BASE_URL']}/person/id/#{person.id}"
     headers = { "location" => person_link }
     [201, headers, nil]
@@ -82,7 +81,6 @@ get '/person/id/:id' do
       [200, person_response]
     else
       modified_since = Time.parse(env["HTTP_IF_MODIFIED_SINCE"])
-      ## Converting to integer because the fractions of a second tend to mess this up, even for datetimes that are otherwise equivalent
       if person.updated_at.to_i > modified_since.to_i
         [200, person_response]
       else
@@ -102,8 +100,9 @@ post '/person/id/:id' do
   data = JSON.parse request.body.read
   if SkeletonApp::AppService.not_admin_or_owner?(request, "can-write", params[:id]) then return [401, nil] end
   begin
-    api_key = SkeletonApp::AppService.email_api_key request
-    SkeletonApp::PersonService.update_person params[:id], data, api_key
+    person = SkeletonApp::Person.find(params[:id])
+    SkeletonApp::PersonService.update_person person, data
+    SkeletonApp::AppService.send_validation_email_for_email_change_if_enabled person, request, data["email"]
     [204, nil]
   rescue Mongoid::Errors::DocumentNotFound
     [404, nil]
@@ -124,7 +123,6 @@ post '/person/id/:id/reset_password' do
   content_type :json
   data = JSON.parse(request.body.read)
   if SkeletonApp::AppService.unauthorized?(request, "reset-password") then return [401, nil] end
-
   begin
     SkeletonApp::LoginService.password_reset_by_user params[:id], data
     [204, nil]
@@ -195,8 +193,7 @@ post '/request_password_reset' do
 
   begin
     person = SkeletonApp::Person.find_by(email: data["email"])
-    api_key = SkeletonApp::AppService.email_api_key request
-    email_sent = SkeletonApp::AuthService.send_password_reset_email person, api_key
+    email_sent = SkeletonApp::AppService.send_password_reset_email_if_enabled person, request
     if email_sent[:error_code] == 0
       [201, nil]
     else
@@ -218,7 +215,6 @@ end
 get '/people' do
   content_type :json
   if SkeletonApp::AppService.unauthorized?(request, "admin") then return [401, nil] end
-
   SkeletonApp::AppService.add_if_modified_since_to_request_parameters self
   people_docs = SkeletonApp::PersonService.get_people(params)
   response_body = SkeletonApp::AppService.json_document_for_people_documents people_docs

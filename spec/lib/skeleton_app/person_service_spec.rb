@@ -198,7 +198,7 @@ describe SkeletonApp::PersonService do
 
 			before do
 				data = Hash("given_name" => "New", "family_name" => "Name", "email" => "#{SecureRandom.hex}@test.com")
-				@result = SkeletonApp::PersonService.update_person @person.id, data
+				SkeletonApp::PersonService.update_person @person, data
 				@updated_record = SkeletonApp::Person.find(@person.id)
 			end
 
@@ -210,10 +210,6 @@ describe SkeletonApp::PersonService do
 				@updated_record.phone.must_equal @person.phone
 			end
 
-			it 'must have sent an email to validate a new email address' do
-				@result[:message].must_equal "Test job accepted"
-			end
-
 		end
 
 		describe 'error conditions' do
@@ -221,7 +217,7 @@ describe SkeletonApp::PersonService do
 			it 'must raise an ArgumentError if the username is attempted to be updated' do
 				data = Hash("username" => "newusername")
 				assert_raises ArgumentError do
-					SkeletonApp::PersonService.update_person @person.id, data
+					SkeletonApp::PersonService.update_person @person, data
 				end
 			end
 
@@ -229,60 +225,13 @@ describe SkeletonApp::PersonService do
 				another_person = create(:person, username: SecureRandom.hex, email: "#{SecureRandom.hex}@test.com")
 				data = Hash("email" => another_person.email)
 				assert_raises RuntimeError do
-					SkeletonApp::PersonService.update_person @person.id, data
+					SkeletonApp::PersonService.update_person @person, data
 				end
 			end
 
 			it 'must not raise a RuntimeError if the email address equals the persons email address' do
 				data = Hash("email" => @person.email)
-				SkeletonApp::PersonService.update_person @person.id, data
-			end
-
-		end
-
-		describe 'send email to validate email address change' do
-
-			before do
-				@personA = create(:person, username: SecureRandom.hex, email: "#{SecureRandom.hex}@test.com")
-			end
-
-			describe 'send email' do
-
-				before do
-					@personA.email_address_validated = true
-					@new_email = "#{SecureRandom.hex}@test.com"
-					@old_email = @personA.email
-					@personA.email = @new_email
-					@personA.save
-					data = Hash("email" => @new_email)
-					@result = SkeletonApp::PersonService.send_email_to_validate_email_address_change @personA, data, @old_email
-				end
-
-				it 'must send an email asking for the new email address to be validated if the email address is changed' do
-					@result[:message].must_equal "Test job accepted"
-				end
-
-				it 'must mark the email address as not validated' do
-					person = SkeletonApp::Person.find(@personA.id)
-					person.email_address_validated.must_equal false
-				end
-
-				it 'must have sent the email to the new email address' do
-					@result[:to].must_equal @new_email
-				end
-
-			end
-
-			it 'must not send an email if the email address has not changed' do
-				data = Hash("email" => @personA.email)
-				result = SkeletonApp::PersonService.send_email_to_validate_email_address_change @personA, data, @personA.email
-				result.must_equal nil
-			end
-
-			it 'must not send an email if an email address is not included in the data' do
-				data = Hash("given_name" => "Harold")
-				result = SkeletonApp::PersonService.send_email_to_validate_email_address_change @personA, data, @personA.email
-				result.must_equal nil
+				SkeletonApp::PersonService.update_person @person, data
 			end
 
 		end
